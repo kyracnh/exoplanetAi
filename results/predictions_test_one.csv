@@ -1,0 +1,2 @@
+koi_score,koi_depth,koi_model_snr,koi_period,koi_duration,koi_prad,koi_srad,koi_kepmag,koi_teq,prediction,confidence,prob_CANDIDATE,prob_CONFIRMED,prob_FALSE POSITIVE
+0.0,35.8,12.1,1.33254024,3.16,0.59,0.887,14.282,1658.0,FALSE POSITIVE,1.0,0.0,0.0,1.0
