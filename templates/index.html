@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoplanet Classifier</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 50px 0;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: none;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 25px;
+        }
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 50px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #764ba2;
+            background-color: #e9ecef;
+        }
+        .upload-area i {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 40px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .feature-list {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .feature-badge {
+            background-color: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            margin: 5px;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+        .model-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Model Status Badge -->
+    <div class="model-status">
+        {% if model_loaded %}
+        <span class="badge bg-success p-3">
+            <i class="fas fa-check-circle"></i> Model Ready
+        </span>
+        {% else %}
+        <span class="badge bg-danger p-3">
+            <i class="fas fa-exclamation-circle"></i> Model Not Loaded
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 class="text-white mb-3">
+                <i class="fas fa-globe"></i> Exoplanet Classifier
+            </h1>
+            <p class="text-white-50">Upload your CSV file to predict exoplanet dispositions</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' }}"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Main Upload Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-upload"></i> Upload Data</h3>
+            </div>
+            <div class="card-body">
+                <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h4>Click to upload or drag and drop</h4>
+                        <p class="text-muted">CSV files only (Max 16MB)</p>
+                        <input type="file" name="file" id="fileInput" accept=".csv" style="display: none;" onchange="updateFileName(this)" required>
+                        <p id="fileName" class="mt-3 fw-bold text-primary"></p>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg" {% if not model_loaded %}disabled{% endif %}>
+                            <i class="fas fa-magic"></i> Predict Dispositions
+                        </button>
+                    </div>
+                </form>
+
+                {% if not model_loaded %}
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Model not loaded!</strong> Please run <code>python3 model_trainer.py</code> first to train the model.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Required Features Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Required CSV Columns</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Your CSV file must contain the following columns:</p>
+                <div class="feature-list">
+                    <span class="feature-badge">koi_score</span>
+                    <span class="feature-badge">koi_depth</span>
+                    <span class="feature-badge">koi_model_snr</span>
+                    <span class="feature-badge">koi_period</span>
+                    <span class="feature-badge">koi_duration</span>
+                    <span class="feature-badge">koi_prad</span>
+                    <span class="feature-badge">koi_srad</span>
+                    <span class="feature-badge">koi_kepmag</span>
+                    <span class="feature-badge">koi_teq</span>
+                </div>
+                <p class="text-muted mt-3 mb-0">
+                    <i class="fas fa-info-circle"></i> 
+                    Do <strong>NOT</strong> include the <code>koi_disposition</code> column - the model will predict it!
+                </p>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <i class="fas fa-file-csv fa-3x text-primary mb-3"></i>
+                        <h6>1. Prepare CSV</h6>
+                        <p class="text-muted small">Ensure all required columns are present</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-upload fa-3x text-success mb-3"></i>
+                        <h6>2. Upload File</h6>
+                        <p class="text-muted small">Upload your CSV file</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-download fa-3x text-info mb-3"></i>
+                        <h6>3. Get Results</h6>
+                        <p class="text-muted small">Download predictions with probabilities</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if model_loaded %}
+        <div class="text-center mt-4">
+            <a href="/model-info" class="btn btn-outline-light">
+                <i class="fas fa-info-circle"></i> View Model Information
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateFileName(input) {
+            const fileName = input.files[0]?.name;
+            if (fileName) {
+                document.getElementById('fileName').textContent = '📄 ' + fileName;
+            }
+        }
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        const fileInput = document.getElementById('fileInput');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            uploadArea.style.borderColor = '#764ba2';
+            uploadArea.style.backgroundColor = '#e9ecef';
+        }
+
+        function unhighlight(e) {
+            uploadArea.style.borderColor = '#667eea';
+            uploadArea.style.backgroundColor = '#f8f9fa';
+        }
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            updateFileName(fileInput);
+        }
+    </script>
+</body>
+</html>
