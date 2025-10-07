@@ -20,6 +20,7 @@ Required CSV header:
 
 <img src="image_include/Screenshot from 2025-10-07 13-52-42.png" alt="Required columns" width="600" />
 
+## Required CSV header:
 ```
 koi_score,koi_depth,koi_model_snr,koi_period,koi_duration,koi_prad,koi_srad,koi_kepmag,koi_teq
 ```
@@ -52,4 +53,5 @@ Probabilities: {CANDIDATE: 0.96, CONFIRMED: 0.03, FALSE: 0.01}
 
 <img src="image_include/Screenshot from 2025-10-07 13-53-41.png" alt="Results" width="600" />
 
+## Output
 Output: Prediction label, Confidence (%), per-class probabilities.
