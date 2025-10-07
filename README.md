@@ -2,7 +2,7 @@
 
 Website: https://exoplanetai.onrender.com/
 
-![Upload screenshot](image_include/Screenshot from 2025-10-07 13-42-24.png)
+<img src="image_include/Screenshot from 2025-10-07 13-42-24.png" alt="Upload" width="600" />
 
 ## Problem
 
@@ -16,7 +16,7 @@ Currently, much of exoplanet candidate vetting is performed manually by NASA sci
 - Make results downloadable and expose a small API for programmatic use.
 
 Required CSV header:
-![Required columns screenshot](image_include/Screenshot from 2025-10-07 13-52-42.png)
+<img src="image_include/Screenshot from 2025-10-07 13-52-42.png" alt="Required columns" width="600" />
 ```
 koi_score,koi_depth,koi_model_snr,koi_period,koi_duration,koi_prad,koi_srad,koi_kepmag,koi_teq
 ```
@@ -46,14 +46,6 @@ Confidence: 96%
 Probabilities: {CANDIDATE: 0.96, CONFIRMED: 0.03, FALSE: 0.01}
 ```
 
-![Result screenshot](image_include/Screenshot from 2025-10-07 13-53-41.png)
-
-## Images
-
-<p>
-	<img src="image_include/Screenshot from 2025-10-07 13-42-24.png" alt="Upload" width="600" />
-	<img src="image_include/Screenshot from 2025-10-07 13-52-42.png" alt="Required columns" width="600" />
-	<img src="image_include/Screenshot from 2025-10-07 13-53-41.png" alt="Results" width="600" />
-</p>
+<img src="image_include/Screenshot from 2025-10-07 13-53-41.png" alt="Results" width="600" />
 
 Output: Prediction label, Confidence (%), per-class probabilities.
